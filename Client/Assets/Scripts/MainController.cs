@@ -11,6 +11,8 @@ public class MainController : MonoBehaviour
 
     [SerializeField]
     GameObject playerPrefab;
+    [SerializeField]
+    GameObject otherPlayerPrefab;
 
     GameObject playerObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
