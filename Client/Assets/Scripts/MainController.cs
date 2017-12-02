@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using WebSocketSharp;
 using RPC = WebSocketSample.RPC;
 
@@ -17,6 +18,7 @@ public class MainController : MonoBehaviour
     GameObject playerObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
     int playerId;
+    Dictionary<int, GameObject> otherPlayerObjs = new Dictionary<int, GameObject>();
 
     void Start()
     {
@@ -58,6 +60,12 @@ public class MainController : MonoBehaviour
                     {
                         var loginResponse = JsonUtility.FromJson<RPC.LoginResponse>(eventArgs.Data);
                         MainThreadExecutor.Enqueue(() => OnLoginResponse(loginResponse.Payload));
+                        break;
+                    }
+                case "sync":
+                    {
+                        var syncMessage = JsonUtility.FromJson<RPC.Sync>(eventArgs.Data);
+                        MainThreadExecutor.Enqueue(() => OnSync(syncMessage.Payload));
                         break;
                     }
             }
@@ -110,5 +118,31 @@ public class MainController : MonoBehaviour
         var jsonMessage = JsonUtility.ToJson(new RPC.PlayerUpdate(new RPC.PlayerUpdatePayload(playerId, rpcPosition)));
         Debug.Log(jsonMessage);
         webSocket.Send(jsonMessage);
+    }
+
+    void OnSync(RPC.SyncPayload payload)
+    {
+        Debug.Log("<< Sync");
+        foreach (var otherPlayer in payload.Players)
+        {
+            // 自分だったら捨てる
+            if (otherPlayer.Id == playerId) continue;
+
+            var otherPlayerPoision = new Vector3(otherPlayer.Position.X, otherPlayer.Position.Y, otherPlayer.Position.Z);
+
+            if (otherPlayerObjs.ContainsKey(otherPlayer.Id))
+            {
+                // 既にGameObjectがいたら位置更新
+                otherPlayerObjs[otherPlayer.Id].transform.position = otherPlayerPoision;
+            }
+            else
+            {
+                // GameObjectがいなかったら新規作成
+                var otherPlayerObj = Instantiate(otherPlayerPrefab, otherPlayerPoision, Quaternion.identity) as GameObject;
+                otherPlayerObj.name = "Other" + otherPlayer.Id;
+                otherPlayerObjs.Add(otherPlayer.Id, otherPlayerObj);
+                Debug.Log("Instantiated a new player: " + otherPlayer.Id);
+            }
+        }
     }
 }
