@@ -14,6 +14,8 @@ public class MainController : MonoBehaviour
     GameObject playerPrefab;
     [SerializeField]
     GameObject otherPlayerPrefab;
+    [SerializeField]
+    GameObject itemPrefab;
 
     GameObject playerObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
@@ -66,6 +68,12 @@ public class MainController : MonoBehaviour
                     {
                         var syncMessage = JsonUtility.FromJson<RPC.Sync>(eventArgs.Data);
                         MainThreadExecutor.Enqueue(() => OnSync(syncMessage.Payload));
+                        break;
+                    }
+                case "spawn":
+                    {
+                        var spawnResponse = JsonUtility.FromJson<RPC.Spawn>(eventArgs.Data);
+                        MainThreadExecutor.Enqueue(() => OnSpawn(spawnResponse.Payload));
                         break;
                     }
             }
@@ -144,5 +152,12 @@ public class MainController : MonoBehaviour
                 Debug.Log("Instantiated a new player: " + otherPlayer.Id);
             }
         }
+    }
+
+    void OnSpawn(RPC.SpawnPayload payload)
+    {
+        Debug.Log("<< OnSpawn");
+        var position = new Vector3(payload.Position.X, payload.Position.Y, payload.Position.Z);
+        Instantiate(itemPrefab, position, Quaternion.identity);
     }
 }
