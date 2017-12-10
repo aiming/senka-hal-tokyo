@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Timers;
 using Newtonsoft.Json;
 using WebSocketSample.RPC;
 
@@ -12,6 +13,11 @@ namespace WebSocketSample.Server
 
         public event Action<string, string> sendTo;
         public event Action<string> broadcast;
+
+        public GameModel()
+        {
+            StartSpawnTimer();
+        }
 
         public void OnUpdate()
         {
@@ -73,6 +79,26 @@ namespace WebSocketSample.Server
             var syncRpc = new Sync(new SyncPayload(movedPlayers));
             var syncJson = JsonConvert.SerializeObject(syncRpc);
             broadcast(syncJson);
+        }
+
+        void StartSpawnTimer()
+        {
+            var random = new Random();
+            var timer = new Timer(3000);
+            timer.Elapsed += (_, __) =>
+            {
+                if (players.Count == 0) return;
+
+                var randomX = random.Next(-5, 5);
+                var randomZ = random.Next(-5, 5);
+                var position = new Position(randomX, 0.5f, randomZ);
+                var spawnRpc = new Spawn(new SpawnPayload(position));
+                var spawnJson = JsonConvert.SerializeObject(spawnRpc);
+                broadcast(spawnJson);
+
+                Console.WriteLine("<< Spawn");
+            };
+            timer.Start();
         }
     }
 }
