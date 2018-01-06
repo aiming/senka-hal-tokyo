@@ -24,6 +24,19 @@ namespace WebSocketSample.RPC
     }
 
     [System.Serializable]
+    public class Item
+    {
+        public int Id;
+        public Position Position;
+
+        public Item(int id, Position position)
+        {
+            this.Id = id;
+            this.Position = position;
+        }
+    }
+
+    [System.Serializable]
     public class PlayerUpdate
     {
         public string Method = "player_update";
@@ -168,11 +181,11 @@ namespace WebSocketSample.RPC
     [System.Serializable]
     public class SpawnPayload
     {
-        public Position Position;
+        public Item Item;
 
-        public SpawnPayload(Position position)
+        public SpawnPayload(Item item)
         {
-            this.Position = position;
+            this.Item = item;
         }
     }
 }

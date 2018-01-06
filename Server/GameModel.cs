@@ -92,7 +92,8 @@ namespace WebSocketSample.Server
                 var randomX = random.Next(-5, 5);
                 var randomZ = random.Next(-5, 5);
                 var position = new Position(randomX, 0.5f, randomZ);
-                var spawnRpc = new Spawn(new SpawnPayload(position));
+                var item = new RPC.Item(uidCounter++, position);
+                var spawnRpc = new Spawn(new SpawnPayload(item));
                 var spawnJson = JsonConvert.SerializeObject(spawnRpc);
                 broadcast(spawnJson);
 

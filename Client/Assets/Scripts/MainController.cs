@@ -157,7 +157,8 @@ public class MainController : MonoBehaviour
     void OnSpawn(RPC.SpawnPayload payload)
     {
         Debug.Log("<< OnSpawn");
-        var position = new Vector3(payload.Position.X, payload.Position.Y, payload.Position.Z);
+        var rpcItem = payload.Item;
+        var position = new Vector3(rpcItem.Position.X, rpcItem.Position.Y, rpcItem.Position.Z);
         Instantiate(itemPrefab, position, Quaternion.identity);
     }
 }
