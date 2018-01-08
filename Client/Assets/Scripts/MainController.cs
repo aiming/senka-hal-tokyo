@@ -21,6 +21,7 @@ public class MainController : MonoBehaviour
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
     int playerId;
     Dictionary<int, GameObject> otherPlayerObjs = new Dictionary<int, GameObject>();
+    Dictionary<int, GameObject> items = new Dictionary<int, GameObject>();
 
     void Start()
     {
@@ -159,6 +160,7 @@ public class MainController : MonoBehaviour
         Debug.Log("<< OnSpawn");
         var rpcItem = payload.Item;
         var position = new Vector3(rpcItem.Position.X, rpcItem.Position.Y, rpcItem.Position.Z);
-        Instantiate(itemPrefab, position, Quaternion.identity);
+        var itemObj = Instantiate(itemPrefab, position, Quaternion.identity);
+        items.Add(payload.Item.Id, itemObj);
     }
 }

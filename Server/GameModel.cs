@@ -9,6 +9,8 @@ namespace WebSocketSample.Server
     public class GameModel
     {
         Dictionary<int, Player> players = new Dictionary<int, Player>();
+        Dictionary<int, Item> items = new Dictionary<int, Item>();
+
         int uidCounter;
 
         public event Action<string, string> sendTo;
@@ -92,8 +94,11 @@ namespace WebSocketSample.Server
                 var randomX = random.Next(-5, 5);
                 var randomZ = random.Next(-5, 5);
                 var position = new Position(randomX, 0.5f, randomZ);
-                var item = new RPC.Item(uidCounter++, position);
-                var spawnRpc = new Spawn(new SpawnPayload(item));
+                var item = new Item(uidCounter++, position);
+                items.Add(item.Id, item);
+
+                var rpcItem = new RPC.Item(item.Id, item.Position);
+                var spawnRpc = new Spawn(new SpawnPayload(rpcItem));
                 var spawnJson = JsonConvert.SerializeObject(spawnRpc);
                 broadcast(spawnJson);
 
