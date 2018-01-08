@@ -62,6 +62,21 @@ namespace WebSocketSample.Server
             }
         }
 
+        public void OnGetItem(string senderId, GetItemPayload getItemPayload)
+        {
+            Console.WriteLine(">> GetItem");
+
+            var itemId = getItemPayload.ItemId;
+            if (items.ContainsKey(itemId))
+            {
+                items.Remove(itemId);
+            }
+            else
+            {
+                Console.WriteLine("Not found ItemId: "+ itemId);
+            }
+        }
+
         void Sync()
         {
             if (players.Count == 0) return;

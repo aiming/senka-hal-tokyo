@@ -168,6 +168,11 @@ public class MainController : MonoBehaviour
         {
             items.Remove(payload.Item.Id);
             Destroy(itemObj);
+
+            var getItemRpc = new RPC.GetItem(new RPC.GetItemPayload(payload.Item.Id));
+            var getItemJson = JsonUtility.ToJson(getItemRpc);
+            webSocket.Send(getItemJson);
+            Debug.Log(">> GetItem");
         };
     }
 }

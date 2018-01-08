@@ -188,4 +188,27 @@ namespace WebSocketSample.RPC
             this.Item = item;
         }
     }
+
+    [System.Serializable]
+    public class GetItem
+    {
+        public string Method = "get_item";
+        public GetItemPayload Payload;
+
+        public GetItem(GetItemPayload payload)
+        {
+            this.Payload = payload;
+        }
+    }
+
+    [System.Serializable]
+    public class GetItemPayload
+    {
+        public int ItemId;
+
+        public GetItemPayload(int itemId)
+        {
+            this.ItemId = itemId;
+        }
+    }
 }
