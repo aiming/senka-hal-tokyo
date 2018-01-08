@@ -211,4 +211,27 @@ namespace WebSocketSample.RPC
             this.ItemId = itemId;
         }
     }
+
+    [System.Serializable]
+    public class DeleteItem
+    {
+        public string Method = "delete_item";
+        public DeleteItemPayload Payload;
+
+        public DeleteItem(DeleteItemPayload payload)
+        {
+            this.Payload = payload;
+        }
+    }
+
+    [System.Serializable]
+    public class DeleteItemPayload
+    {
+        public int ItemId;
+
+        public DeleteItemPayload(int itemId)
+        {
+            this.ItemId = itemId;
+        }
+    }
 }
