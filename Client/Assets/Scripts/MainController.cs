@@ -206,6 +206,10 @@ public class MainController : MonoBehaviour
     void OnEnvironment(RPC.EnvironmentPayload payload)
     {
         Debug.Log("<< Environment");
-        // TODO: アイテムを生成する
+
+        foreach (var rpcItem in payload.Items)
+        {
+            SpawnItem(rpcItem);
+        }
     }
 }
