@@ -234,4 +234,27 @@ namespace WebSocketSample.RPC
             this.ItemId = itemId;
         }
     }
+
+    [System.Serializable]
+    public class Environment
+    {
+        public string Method = "environment";
+        public EnvironmentPayload Payload;
+
+        public Environment(EnvironmentPayload payload)
+        {
+            this.Payload = payload;
+        }
+    }
+
+    [System.Serializable]
+    public class EnvironmentPayload
+    {
+        public List<Item> Items;
+
+        public EnvironmentPayload(List<Item> items)
+        {
+            this.Items = items;
+        }
+    }
 }

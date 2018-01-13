@@ -83,6 +83,12 @@ public class MainController : MonoBehaviour
                         MainThreadExecutor.Enqueue(() => OnDeleteItem(deleteMessage.Payload));
                         break;
                     }
+                case "environment":
+                    {
+                        var environmentMessage = JsonUtility.FromJson<RPC.Environment>(eventArgs.Data);
+                        MainThreadExecutor.Enqueue(() => OnEnvironment(environmentMessage.Payload));
+                        break;
+                    }
             }
         };
 
@@ -191,5 +197,11 @@ public class MainController : MonoBehaviour
             Destroy(items[itemId]);
             items.Remove(itemId);
         }
+    }
+
+    void OnEnvironment(RPC.EnvironmentPayload payload)
+    {
+        Debug.Log("<< Environment");
+        // TODO: アイテムを生成する
     }
 }
