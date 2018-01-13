@@ -207,8 +207,25 @@ public class MainController : MonoBehaviour
     {
         Debug.Log("<< Environment");
 
+        var serverUnknownItems = new List<KeyValuePair<int, GameObject>>();
+        // サーバーからのリスト(payload.Items)にないアイテムを所持していたらserverUnknownItemsに追加
+        foreach (var item in items)
+        {
+            if (payload.Items.Exists(itemRpc => itemRpc.Id == item.Key)) continue;
+
+            serverUnknownItems.Add(item);
+        }
+        // serverUnknownItemsをクライアントから削除
+        foreach (var item in serverUnknownItems)
+        {
+            items.Remove(item.Key);
+            Destroy(item.Value);
+        }
+
         foreach (var rpcItem in payload.Items)
         {
+            if (items.ContainsKey(rpcItem.Id)) continue;
+
             SpawnItem(rpcItem);
         }
     }
