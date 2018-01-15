@@ -41,7 +41,7 @@ namespace WebSocketSample.Server
         {
             Console.WriteLine(">> Login");
 
-            var player = new Player(uidCounter++, loginPayload.Name, new Position(0f, 0f, 0f));
+            var player = new Player(uidCounter++, loginPayload.Name, new Position(0f, 0f, 0f), 0);
             players[player.Uid] = player;
 
             var loginResponseRpc = new LoginResponse(new LoginResponsePayload(player.Uid));
