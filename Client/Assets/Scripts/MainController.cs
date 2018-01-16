@@ -144,25 +144,29 @@ public class MainController : MonoBehaviour
     void OnSync(RPC.SyncPayload payload)
     {
         Debug.Log("<< Sync");
-        foreach (var otherPlayer in payload.Players)
+        foreach (var rpcPlayer in payload.Players)
         {
-            // 自分だったら捨てる
-            if (otherPlayer.Id == playerId) continue;
-
-            var otherPlayerPoision = new Vector3(otherPlayer.Position.X, otherPlayer.Position.Y, otherPlayer.Position.Z);
-
-            if (otherPlayerObjs.ContainsKey(otherPlayer.Id))
+            if (rpcPlayer.Id == playerId)
             {
-                // 既にGameObjectがいたら位置更新
-                otherPlayerObjs[otherPlayer.Id].transform.position = otherPlayerPoision;
+                playerObj.transform.localScale = CalcPlayerScale(rpcPlayer.Score);
+                continue;
+            }
+
+            var otherPlayerPoision = new Vector3(rpcPlayer.Position.X, rpcPlayer.Position.Y, rpcPlayer.Position.Z);
+
+            if (otherPlayerObjs.ContainsKey(rpcPlayer.Id))
+            {
+                // 既にGameObjectがいたら更新
+                otherPlayerObjs[rpcPlayer.Id].transform.position = otherPlayerPoision;
+                otherPlayerObjs[rpcPlayer.Id].transform.localScale = CalcPlayerScale(rpcPlayer.Score);
             }
             else
             {
                 // GameObjectがいなかったら新規作成
                 var otherPlayerObj = Instantiate(otherPlayerPrefab, otherPlayerPoision, Quaternion.identity) as GameObject;
-                otherPlayerObj.name = "Other" + otherPlayer.Id;
-                otherPlayerObjs.Add(otherPlayer.Id, otherPlayerObj);
-                Debug.Log("Instantiated a new player: " + otherPlayer.Id);
+                otherPlayerObj.name = "Other" + rpcPlayer.Id;
+                otherPlayerObjs.Add(rpcPlayer.Id, otherPlayerObj);
+                Debug.Log("Instantiated a new player: " + rpcPlayer.Id);
             }
         }
     }
@@ -228,5 +232,10 @@ public class MainController : MonoBehaviour
 
             SpawnItem(rpcItem);
         }
+    }
+
+    Vector3 CalcPlayerScale(int score)
+    {
+        return Vector3.one + (Vector3.one * score * 0.2f);
     }
 }

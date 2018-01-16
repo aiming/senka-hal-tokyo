@@ -93,7 +93,7 @@ namespace WebSocketSample.Server
             {
                 if (!player.isPositionChanged) continue;
 
-                var playerRpc = new RPC.Player(player.Uid, player.Position);
+                var playerRpc = new RPC.Player(player.Uid, player.Position, player.Score);
                 movedPlayers.Add(playerRpc);
                 player.isPositionChanged = false;
             }
