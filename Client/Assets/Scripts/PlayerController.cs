@@ -20,4 +20,13 @@ public class PlayerController : MonoBehaviour
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
         rb.AddForce(movement * speed);
     }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        var otherPlayerController = collision.gameObject.GetComponent<OtherPlayerController>();
+        if (otherPlayerController != null)
+        {
+            Debug.Log("OnCollisionEnter with: " + otherPlayerController.Id);
+        }
+    }
 }
