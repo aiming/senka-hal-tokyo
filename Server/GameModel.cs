@@ -84,6 +84,11 @@ namespace WebSocketSample.Server
             }
         }
 
+        public void OnCollision(string senderId, CollisionPayload payload)
+        {
+            // TODO: 勝ち負けを判定して各CLに伝える
+        }
+
         void Sync()
         {
             if (players.Count == 0) return;

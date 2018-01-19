@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     public float speed = 10.0f; // 速度
+
+    public event Action<int> OnCollision;
 
     void Start()
     {
@@ -26,7 +29,7 @@ public class PlayerController : MonoBehaviour
         var otherPlayerController = collision.gameObject.GetComponent<OtherPlayerController>();
         if (otherPlayerController != null)
         {
-            Debug.Log("OnCollisionEnter with: " + otherPlayerController.Id);
+            OnCollision(otherPlayerController.Id);
         }
     }
 }
