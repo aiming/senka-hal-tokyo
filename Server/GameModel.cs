@@ -86,7 +86,15 @@ namespace WebSocketSample.Server
 
         public void OnCollision(string senderId, CollisionPayload payload)
         {
-            // TODO: 勝ち負けを判定して各CLに伝える
+            if (!players.ContainsKey(payload.AlphaId)) { return; }
+            if (!players.ContainsKey(payload.BravoId)) { return; }
+
+            var alphaPlayer = players[payload.AlphaId];
+            var bravoPlayer = players[payload.BravoId];
+
+            if (alphaPlayer.Score == bravoPlayer.Score) { return; }
+
+            var loser = alphaPlayer.Score < bravoPlayer.Score ? alphaPlayer : bravoPlayer;
         }
 
         void Sync()
