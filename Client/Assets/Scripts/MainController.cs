@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using WebSocketSharp;
 using RPC = WebSocketSample.RPC;
 
@@ -259,11 +260,19 @@ public class MainController : MonoBehaviour
         else if (payload.Id == playerId)
         {
             Destroy(playerObj);
+            Invoke("RestartGame", 3);
         }
     }
 
     Vector3 CalcPlayerScale(int score)
     {
         return Vector3.one + (Vector3.one * score * 0.2f);
+    }
+
+    void RestartGame()
+    {
+        webSocket.Close();
+        MainThreadExecutor.Clear();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

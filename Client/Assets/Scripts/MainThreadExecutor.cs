@@ -25,4 +25,13 @@ public class MainThreadExecutor : MonoBehaviour
             actions.Enqueue(action);
         }
     }
+
+    public static void Clear()
+    {
+        lock (actions)
+        {
+            Debug.Log("actions clear");
+            actions.Clear();
+        }
+    }
 }
