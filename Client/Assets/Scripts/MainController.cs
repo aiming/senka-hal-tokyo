@@ -89,6 +89,12 @@ public class MainController : MonoBehaviour
                         MainThreadExecutor.Enqueue(() => OnEnvironment(environmentMessage.Payload));
                         break;
                     }
+                case "delete_player":
+                    {
+                        var deletePlayerMessage = JsonUtility.FromJson<RPC.DeletePlayer>(eventArgs.Data);
+                        MainThreadExecutor.Enqueue(() => OnDeletePlayer(deletePlayerMessage.Payload));
+                        break;
+                    }
             }
         };
 
@@ -240,6 +246,19 @@ public class MainController : MonoBehaviour
             if (items.ContainsKey(rpcItem.Id)) continue;
 
             SpawnItem(rpcItem);
+        }
+    }
+
+    void OnDeletePlayer(RPC.DeletePlayerPayload payload)
+    {
+        if (otherPlayerObjs.ContainsKey(payload.Id))
+        {
+            Destroy(otherPlayerObjs[payload.Id]);
+            otherPlayerObjs.Remove(payload.Id);
+        }
+        else if (payload.Id == playerId)
+        {
+            Destroy(playerObj);
         }
     }
 

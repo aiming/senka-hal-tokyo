@@ -286,4 +286,27 @@ namespace WebSocketSample.RPC
             this.BravoId = bravoId;
         }
     }
+
+    [System.Serializable]
+    public class DeletePlayer
+    {
+        public string Method = "delete_player";
+        public DeletePlayerPayload Payload;
+
+        public DeletePlayer(DeletePlayerPayload payload)
+        {
+            this.Payload = payload;
+        }
+    }
+
+    [System.Serializable]
+    public class DeletePlayerPayload
+    {
+        public int Id;
+
+        public DeletePlayerPayload(int id)
+        {
+            this.Id = id;
+        }
+    }
 }

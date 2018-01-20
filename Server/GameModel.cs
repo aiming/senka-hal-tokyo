@@ -95,6 +95,12 @@ namespace WebSocketSample.Server
             if (alphaPlayer.Score == bravoPlayer.Score) { return; }
 
             var loser = alphaPlayer.Score < bravoPlayer.Score ? alphaPlayer : bravoPlayer;
+
+            players.Remove(loser.Uid);
+
+            var deletePlayerRpc = new DeletePlayer(new DeletePlayerPayload(loser.Uid));
+            var deletePlayerJson = JsonConvert.SerializeObject(deletePlayerRpc);
+            broadcast(deletePlayerJson);
         }
 
         void Sync()
