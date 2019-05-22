@@ -7,7 +7,14 @@ public class MainController : MonoBehaviour
     WebSocket webSocket;    // WebSocketコネクション
 
     [SerializeField]
-    private string connectAddress;
+    string connectAddress;
+
+    [SerializeField]
+    GameObject playerPrefab;
+
+    GameObject playerObj;
+    Vector3 previousPlayerObjPosition; // 前フレームでの位置
+    int playerId;
 
     void Start()
     {
@@ -45,20 +52,61 @@ public class MainController : MonoBehaviour
                         Debug.Log(pong.Payload.Message);
                         break;
                     }
+                case "login_response":
+                    {
+                        var loginResponse = JsonUtility.FromJson<RPC.LoginResponse>(eventArgs.Data);
+                        MainThreadExecutor.Enqueue(() => OnLoginResponse(loginResponse.Payload));
+                        break;
+                    }
             }
         };
 
         webSocket.Connect();
 
-        webSocket.Send(JsonUtility.ToJson(new RPC.Ping(new RPC.PingPayload("ping"))));
+        Login();
     }
 
     void Update()
     {
+        UpdatePosition();
     }
 
     void OnDestroy()
     {
         webSocket.Close();    
+    }
+
+    void Login()
+    {
+        var jsonMessage = JsonUtility.ToJson(new RPC.Login(new RPC.LoginPayload("PlayerName")));
+        Debug.Log(jsonMessage);
+
+        webSocket.Send(jsonMessage);
+        Debug.Log(">> Login");
+    }
+
+    void OnLoginResponse(RPC.LoginResponsePayload response)
+    {
+        Debug.Log("<< LoginResponse");
+        playerId = response.Id;
+        Debug.Log(playerId);
+        playerObj = Instantiate(playerPrefab, new Vector3(0.0f, 0.5f, 0.0f), Quaternion.identity) as GameObject;
+    }
+
+    void UpdatePosition()
+    {
+        if (playerObj == null) return;
+
+        var currentPlayerPosition = playerObj.transform.position;
+        if (currentPlayerPosition == previousPlayerObjPosition) return;
+
+        Debug.Log(">> Update");
+
+        previousPlayerObjPosition = currentPlayerPosition;
+
+        var rpcPosition = new RPC.Position(currentPlayerPosition.x, currentPlayerPosition.y, currentPlayerPosition.z);
+        var jsonMessage = JsonUtility.ToJson(new RPC.PlayerUpdate(new RPC.PlayerUpdatePayload(playerId, rpcPosition)));
+        Debug.Log(jsonMessage);
+        webSocket.Send(jsonMessage);
     }
 }
