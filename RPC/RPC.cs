@@ -152,4 +152,27 @@ namespace WebSocketSample.RPC
             this.Message = message;
         }
     }
+
+    [System.Serializable]
+    public class Spawn
+    {
+        public string Method = "spawn";
+        public SpawnPayload Payload;
+
+        public Spawn(SpawnPayload payload)
+        {
+            this.Payload = payload;
+        }
+    }
+
+    [System.Serializable]
+    public class SpawnPayload
+    {
+        public Position Position;
+
+        public SpawnPayload(Position position)
+        {
+            this.Position = position;
+        }
+    }
 }
