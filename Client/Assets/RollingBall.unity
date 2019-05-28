@@ -824,7 +824,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 435317b1b875f40a688fdbd80cd25c61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  connectAddress: 
+  connectAddress: ws://35.243.212.242:5678
   playerPrefab: {fileID: 1000010242128840, guid: b7ee01bb7113a428d83cd4c2b2dcff8f,
     type: 3}
   otherPlayerPrefab: {fileID: 1000013530691402, guid: 8da97395e89154d00aeaf2c9abf021e2,
