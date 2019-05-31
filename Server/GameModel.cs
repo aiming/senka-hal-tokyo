@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Timers;
 using Newtonsoft.Json;
@@ -8,7 +9,7 @@ namespace WebSocketSample.Server
 {
     public class GameModel
     {
-        Dictionary<int, Player> players = new Dictionary<int, Player>();
+        readonly ConcurrentDictionary<int, Player> players = new ConcurrentDictionary<int, Player>();
         int uidCounter;
 
         public event Action<string, string> sendTo;
