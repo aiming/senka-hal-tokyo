@@ -21,6 +21,7 @@ public class MainController : MonoBehaviour
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
     int playerId;
     Dictionary<int, GameObject> otherPlayerObjs = new Dictionary<int, GameObject>();
+    Dictionary<int, GameObject> items = new Dictionary<int, GameObject>();
 
     void Start()
     {
@@ -74,6 +75,12 @@ public class MainController : MonoBehaviour
                     {
                         var spawnResponse = JsonUtility.FromJson<RPC.Spawn>(eventArgs.Data);
                         MainThreadExecutor.Enqueue(() => OnSpawn(spawnResponse.Payload));
+                        break;
+                    }
+                case "delete_item":
+                    {
+                        var deleteMessage = JsonUtility.FromJson<RPC.DeleteItem>(eventArgs.Data);
+                        MainThreadExecutor.Enqueue(() => OnDeleteItem(deleteMessage.Payload));
                         break;
                     }
             }
@@ -157,7 +164,32 @@ public class MainController : MonoBehaviour
     void OnSpawn(RPC.SpawnPayload payload)
     {
         Debug.Log("<< OnSpawn");
-        var position = new Vector3(payload.Position.X, payload.Position.Y, payload.Position.Z);
-        Instantiate(itemPrefab, position, Quaternion.identity);
+        var rpcItem = payload.Item;
+        var position = new Vector3(rpcItem.Position.X, rpcItem.Position.Y, rpcItem.Position.Z);
+        var itemObj = Instantiate(itemPrefab, position, Quaternion.identity);
+        items.Add(payload.Item.Id, itemObj);
+
+        var item = itemObj.GetComponent<ItemController>();
+        item.OnGet += () =>
+        {
+            items.Remove(payload.Item.Id);
+            Destroy(itemObj);
+
+            var getItemRpc = new RPC.GetItem(new RPC.GetItemPayload(payload.Item.Id));
+            var getItemJson = JsonUtility.ToJson(getItemRpc);
+            webSocket.Send(getItemJson);
+            Debug.Log(">> GetItem");
+        };
+    }
+
+    void OnDeleteItem(RPC.DeleteItemPayload payload)
+    {
+        Debug.Log("<< DeleteItem");
+        var itemId = payload.ItemId;
+        if (items.ContainsKey(itemId))
+        {
+            Destroy(items[itemId]);
+            items.Remove(itemId);
+        }
     }
 }

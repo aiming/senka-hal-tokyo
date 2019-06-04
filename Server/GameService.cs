@@ -11,6 +11,7 @@ namespace WebSocketSample.Server
         public event Action<string> OnPing;
         public event Action<string, LoginPayload> OnLogin;
         public event Action<string, PlayerUpdatePayload> OnPlayerUpdate;
+        public event Action<string, GetItemPayload> OnGetItem;
 
         protected override void OnOpen()
         {
@@ -46,6 +47,12 @@ namespace WebSocketSample.Server
                     {
                         var playerUpdatePayload = JsonConvert.DeserializeObject<PlayerUpdate>(e.Data).Payload;
                         OnPlayerUpdate(ID, playerUpdatePayload);
+                        break;
+                    }
+                case "get_item":
+                    {
+                        var getItemPayload = JsonConvert.DeserializeObject<GetItem>(e.Data).Payload;
+                        OnGetItem(ID, getItemPayload);
                         break;
                     }
             }
