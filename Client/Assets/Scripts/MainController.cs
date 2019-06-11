@@ -83,6 +83,12 @@ public class MainController : MonoBehaviour
                         MainThreadExecutor.Enqueue(() => OnDeleteItem(deleteMessage.Payload));
                         break;
                     }
+                case "environment":
+                    {
+                        var environmentMessage = JsonUtility.FromJson<RPC.Environment>(eventArgs.Data);
+                        MainThreadExecutor.Enqueue(() => OnEnvironment(environmentMessage.Payload));
+                        break;
+                    }
             }
         };
 
@@ -138,25 +144,29 @@ public class MainController : MonoBehaviour
     void OnSync(RPC.SyncPayload payload)
     {
         Debug.Log("<< Sync");
-        foreach (var otherPlayer in payload.Players)
+        foreach (var rpcPlayer in payload.Players)
         {
-            // 自分だったら捨てる
-            if (otherPlayer.Id == playerId) continue;
-
-            var otherPlayerPoision = new Vector3(otherPlayer.Position.X, otherPlayer.Position.Y, otherPlayer.Position.Z);
-
-            if (otherPlayerObjs.ContainsKey(otherPlayer.Id))
+            if (rpcPlayer.Id == playerId)
             {
-                // 既にGameObjectがいたら位置更新
-                otherPlayerObjs[otherPlayer.Id].transform.position = otherPlayerPoision;
+                playerObj.transform.localScale = CalcPlayerScale(rpcPlayer.Score);
+                continue;
+            }
+
+            var otherPlayerPoision = new Vector3(rpcPlayer.Position.X, rpcPlayer.Position.Y, rpcPlayer.Position.Z);
+
+            if (otherPlayerObjs.ContainsKey(rpcPlayer.Id))
+            {
+                // 既にGameObjectがいたら更新
+                otherPlayerObjs[rpcPlayer.Id].transform.position = otherPlayerPoision;
+                otherPlayerObjs[rpcPlayer.Id].transform.localScale = CalcPlayerScale(rpcPlayer.Score);
             }
             else
             {
                 // GameObjectがいなかったら新規作成
                 var otherPlayerObj = Instantiate(otherPlayerPrefab, otherPlayerPoision, Quaternion.identity) as GameObject;
-                otherPlayerObj.name = "Other" + otherPlayer.Id;
-                otherPlayerObjs.Add(otherPlayer.Id, otherPlayerObj);
-                Debug.Log("Instantiated a new player: " + otherPlayer.Id);
+                otherPlayerObj.name = "Other" + rpcPlayer.Id;
+                otherPlayerObjs.Add(rpcPlayer.Id, otherPlayerObj);
+                Debug.Log("Instantiated a new player: " + rpcPlayer.Id);
             }
         }
     }
@@ -164,18 +174,22 @@ public class MainController : MonoBehaviour
     void OnSpawn(RPC.SpawnPayload payload)
     {
         Debug.Log("<< OnSpawn");
-        var rpcItem = payload.Item;
+        SpawnItem(payload.Item);
+    }
+
+    void SpawnItem(RPC.Item rpcItem)
+    {
         var position = new Vector3(rpcItem.Position.X, rpcItem.Position.Y, rpcItem.Position.Z);
         var itemObj = Instantiate(itemPrefab, position, Quaternion.identity);
-        items.Add(payload.Item.Id, itemObj);
+        items.Add(rpcItem.Id, itemObj);
 
         var item = itemObj.GetComponent<ItemController>();
         item.OnGet += () =>
         {
-            items.Remove(payload.Item.Id);
+            items.Remove(rpcItem.Id);
             Destroy(itemObj);
 
-            var getItemRpc = new RPC.GetItem(new RPC.GetItemPayload(payload.Item.Id));
+            var getItemRpc = new RPC.GetItem(new RPC.GetItemPayload(rpcItem.Id, playerId));
             var getItemJson = JsonUtility.ToJson(getItemRpc);
             webSocket.Send(getItemJson);
             Debug.Log(">> GetItem");
@@ -191,5 +205,37 @@ public class MainController : MonoBehaviour
             Destroy(items[itemId]);
             items.Remove(itemId);
         }
+    }
+
+    void OnEnvironment(RPC.EnvironmentPayload payload)
+    {
+        Debug.Log("<< Environment");
+
+        var serverUnknownItems = new List<KeyValuePair<int, GameObject>>();
+        // サーバーからのリスト(payload.Items)にないアイテムを所持していたらserverUnknownItemsに追加
+        foreach (var item in items)
+        {
+            if (payload.Items.Exists(itemRpc => itemRpc.Id == item.Key)) continue;
+
+            serverUnknownItems.Add(item);
+        }
+        // serverUnknownItemsをクライアントから削除
+        foreach (var item in serverUnknownItems)
+        {
+            items.Remove(item.Key);
+            Destroy(item.Value);
+        }
+
+        foreach (var rpcItem in payload.Items)
+        {
+            if (items.ContainsKey(rpcItem.Id)) continue;
+
+            SpawnItem(rpcItem);
+        }
+    }
+
+    Vector3 CalcPlayerScale(int score)
+    {
+        return Vector3.one + (Vector3.one * score * 0.2f);
     }
 }

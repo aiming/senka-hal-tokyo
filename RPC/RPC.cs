@@ -135,11 +135,13 @@ namespace WebSocketSample.RPC
     {
         public int Id;
         public Position Position;
+        public int Score;
 
-        public Player(int id, Position position)
+        public Player(int id, Position position, int score)
         {
             this.Id = id;
             this.Position = position;
+            this.Score = score;
         }
     }
 
@@ -205,10 +207,12 @@ namespace WebSocketSample.RPC
     public class GetItemPayload
     {
         public int ItemId;
+        public int PlayerId;
 
-        public GetItemPayload(int itemId)
+        public GetItemPayload(int itemId, int playerId)
         {
             this.ItemId = itemId;
+            this.PlayerId = playerId;
         }
     }
 
@@ -232,6 +236,29 @@ namespace WebSocketSample.RPC
         public DeleteItemPayload(int itemId)
         {
             this.ItemId = itemId;
+        }
+    }
+
+    [System.Serializable]
+    public class Environment
+    {
+        public string Method = "environment";
+        public EnvironmentPayload Payload;
+
+        public Environment(EnvironmentPayload payload)
+        {
+            this.Payload = payload;
+        }
+    }
+
+    [System.Serializable]
+    public class EnvironmentPayload
+    {
+        public List<Item> Items;
+
+        public EnvironmentPayload(List<Item> items)
+        {
+            this.Items = items;
         }
     }
 }

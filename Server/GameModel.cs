@@ -41,7 +41,7 @@ namespace WebSocketSample.Server
         {
             Console.WriteLine(">> Login");
 
-            var player = new Player(uidCounter++, loginPayload.Name, new Position(0f, 0f, 0f));
+            var player = new Player(uidCounter++, loginPayload.Name, new Position(0f, 0f, 0f), 0);
             players[player.Uid] = player;
 
             var loginResponseRpc = new LoginResponse(new LoginResponsePayload(player.Uid));
@@ -49,6 +49,8 @@ namespace WebSocketSample.Server
             sendTo(loginResponseJson, senderId);
 
             Console.WriteLine(player.ToString() + " login.");
+
+            Environment(senderId);
         }
 
         public void OnPlayerUpdate(string senderId, PlayerUpdatePayload playerUpdatePayload)
@@ -70,6 +72,7 @@ namespace WebSocketSample.Server
             if (items.ContainsKey(itemId))
             {
                 items.Remove(itemId);
+                players[getItemPayload.PlayerId].Score++;
 
                 var deleteItemRpc = new DeleteItem(new DeleteItemPayload(itemId));
                 var deleteItemJson = JsonConvert.SerializeObject(deleteItemRpc);
@@ -90,7 +93,7 @@ namespace WebSocketSample.Server
             {
                 if (!player.isPositionChanged) continue;
 
-                var playerRpc = new RPC.Player(player.Uid, player.Position);
+                var playerRpc = new RPC.Player(player.Uid, player.Position, player.Score);
                 movedPlayers.Add(playerRpc);
                 player.isPositionChanged = false;
             }
@@ -124,6 +127,20 @@ namespace WebSocketSample.Server
                 Console.WriteLine("<< Spawn");
             };
             timer.Start();
+        }
+
+        void Environment(string id)
+        {
+            var itemsRpc = new List<RPC.Item>();
+            foreach (var item in items.Values)
+            {
+                var itemRpc = new RPC.Item(item.Id, item.Position);
+                itemsRpc.Add(itemRpc);
+            }
+
+            var environmentRpc = new RPC.Environment(new EnvironmentPayload(itemsRpc));
+            var environmentJson = JsonConvert.SerializeObject(environmentRpc);
+            sendTo(environmentJson, id);
         }
     }
 }
