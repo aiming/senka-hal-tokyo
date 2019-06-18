@@ -145,7 +145,10 @@ namespace WebSocketSample.Server
                 var randomZ = random.Next(-5, 5);
                 var position = new Position(randomX, 0.5f, randomZ);
                 var item = new Item(uidCounter++, position);
-                items.Add(item.Id, item);
+                lock (items)
+                {
+                    items.Add(item.Id, item);
+                }
 
                 var rpcItem = new RPC.Item(item.Id, item.Position);
                 var spawnRpc = new Spawn(new SpawnPayload(rpcItem));
@@ -160,10 +163,13 @@ namespace WebSocketSample.Server
         void Environment(string id)
         {
             var itemsRpc = new List<RPC.Item>();
-            foreach (var item in items.Values)
+            lock (items)
             {
-                var itemRpc = new RPC.Item(item.Id, item.Position);
-                itemsRpc.Add(itemRpc);
+                foreach (var item in items.Values)
+                {
+                    var itemRpc = new RPC.Item(item.Id, item.Position);
+                    itemsRpc.Add(itemRpc);
+                }
             }
 
             var environmentRpc = new RPC.Environment(new EnvironmentPayload(itemsRpc));
