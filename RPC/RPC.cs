@@ -261,4 +261,52 @@ namespace WebSocketSample.RPC
             this.Items = items;
         }
     }
+
+    [System.Serializable]
+    public class Collision
+    {
+        public string Method = "collision";
+        public CollisionPayload Payload;
+
+        public Collision(CollisionPayload payload)
+        {
+            this.Payload = payload;
+        }
+    }
+
+    [System.Serializable]
+    public class CollisionPayload
+    {
+        public int AlphaId;
+        public int BravoId;
+
+        public CollisionPayload(int alphaId, int bravoId)
+        {
+            this.AlphaId = alphaId;
+            this.BravoId = bravoId;
+        }
+    }
+
+    [System.Serializable]
+    public class DeletePlayer
+    {
+        public string Method = "delete_player";
+        public DeletePlayerPayload Payload;
+
+        public DeletePlayer(DeletePlayerPayload payload)
+        {
+            this.Payload = payload;
+        }
+    }
+
+    [System.Serializable]
+    public class DeletePlayerPayload
+    {
+        public int Id;
+
+        public DeletePlayerPayload(int id)
+        {
+            this.Id = id;
+        }
+    }
 }

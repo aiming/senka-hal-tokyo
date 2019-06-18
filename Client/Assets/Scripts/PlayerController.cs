@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     public float speed = 10.0f; // 速度
+
+    public event Action<int> OnCollision;
 
     void Start()
     {
@@ -19,5 +22,14 @@ public class PlayerController : MonoBehaviour
         // 速度の設定
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
         rb.AddForce(movement * speed);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        var otherPlayerController = collision.gameObject.GetComponent<OtherPlayerController>();
+        if (otherPlayerController != null)
+        {
+            OnCollision(otherPlayerController.Id);
+        }
     }
 }

@@ -12,6 +12,7 @@ namespace WebSocketSample.Server
         public event Action<string, LoginPayload> OnLogin;
         public event Action<string, PlayerUpdatePayload> OnPlayerUpdate;
         public event Action<string, GetItemPayload> OnGetItem;
+        public event Action<string, CollisionPayload> OnCollision;
 
         protected override void OnOpen()
         {
@@ -53,6 +54,12 @@ namespace WebSocketSample.Server
                     {
                         var getItemPayload = JsonConvert.DeserializeObject<GetItem>(e.Data).Payload;
                         OnGetItem(ID, getItemPayload);
+                        break;
+                    }
+                case "collision":
+                    {
+                        var collisionPayload = JsonConvert.DeserializeObject<RPC.Collision>(e.Data).Payload;
+                        OnCollision(ID, collisionPayload);
                         break;
                     }
             }
