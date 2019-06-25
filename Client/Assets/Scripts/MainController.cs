@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 using WebSocketSharp;
 using RPC = WebSocketSample.RPC;
 
@@ -20,6 +21,9 @@ public class MainController : MonoBehaviour
     GameObject otherPlayerPrefab;
     [SerializeField]
     GameObject itemPrefab;
+    [SerializeField]
+    GameObject itemPoisonPrefab;
+
 
     [SerializeField]
     private string connectAddress;
@@ -45,7 +49,7 @@ public class MainController : MonoBehaviour
         {
             Debug.Log("WebSocket Closed");
         };
-
+        
         // メッセージを受信したときのハンドラ
         webSocket.OnMessage += (sender, eventArgs) =>
         {
@@ -200,17 +204,32 @@ public class MainController : MonoBehaviour
 
     void SpawnItem(RPC.Item itemRpc)
     {
-        var itemObj = Instantiate(
-            itemPrefab,
-            new Vector3(itemRpc.Position.X, itemRpc.Position.Y, itemRpc.Position.Z),
-            Quaternion.identity
-        );
+        int rand = System.Random.Range(0, 10);
+        if (rand == 9)
+        {
+           var itemObj = Instantiate(
+              itemPoisonPrefab,
+              new Vector3(itemRpc.Position.X, itemRpc.Position.Y, itemRpc.Position.Z),
+              Quaternion.identity
+          );
+        }
+        else
+        {
+           var itemObj = Instantiate(
+               itemPrefab,
+               new Vector3(itemRpc.Position.X, itemRpc.Position.Y, itemRpc.Position.Z),
+               Quaternion.identity
+           );
+        }
+       
+        
         items.Add(itemRpc.Id, itemObj);
 
         var item = itemObj.GetComponent<ItemController>();
         item.ItemId = itemRpc.Id;
         item.OnGot += () =>
         {
+            
             items.Remove(item.ItemId);
             Destroy(itemObj);
 
