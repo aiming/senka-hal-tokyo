@@ -86,6 +86,18 @@ namespace WebSocketSample.Server
                 Console.WriteLine("Not found ItemId: "+ itemId);
             }
         }
+        public void OnDecScore(string senderId, DecScorePayload getItemPayload)
+        {
+            Console.WriteLine(">> DecScore");
+
+            var score = getItemPayload.DecScore;
+            if (players[getItemPayload.PlayerId].Score > 0)
+            {
+                players[getItemPayload.PlayerId].Score -= score;
+
+            }
+           
+        }
 
         public void OnCollision(string senderId, CollisionPayload payload)
         {
@@ -97,16 +109,17 @@ namespace WebSocketSample.Server
 
             if (alphaPlayer.Score == bravoPlayer.Score) { return; }
 
-            var loser = alphaPlayer.Score < bravoPlayer.Score ? alphaPlayer : bravoPlayer;
+            var winer = alphaPlayer.Score > bravoPlayer.Score ? alphaPlayer : bravoPlayer;
 
-            lock (players)
-            {
-                players.Remove(loser.Uid);
-            }
+            players[winer.Uid].Score -= 1;
+            //lock (players)
+            //{
+            //    players.Remove(winer.Uid);
+            //}
 
-            var deletePlayerRpc = new DeletePlayer(new DeletePlayerPayload(loser.Uid));
-            var deletePlayerJson = JsonConvert.SerializeObject(deletePlayerRpc);
-            broadcast(deletePlayerJson);
+            //var deletePlayerRpc = new DeletePlayer(new DeletePlayerPayload(winer.Uid));
+            //var deletePlayerJson = JsonConvert.SerializeObject(deletePlayerRpc);
+            //broadcast(deletePlayerJson);
         }
 
         void Sync()
@@ -136,26 +149,63 @@ namespace WebSocketSample.Server
         void StartSpawnTimer()
         {
             var random = new Random();
-            var timer = new Timer(3000);
+            var timer = new Timer(800);
             timer.Elapsed += (_, __) =>
             {
-                if (players.Count == 0) return;
+                if (players.Count <= 3) return;
 
-                var randomX = random.Next(-5, 5);
-                var randomZ = random.Next(-5, 5);
-                var position = new Position(randomX, 0.5f, randomZ);
-                var item = new Item(uidCounter++, position);
-                lock (items)
+                bool Area1 = false;
+                bool Area2 = false;
+                foreach (var player in players.Values) {
+
+                    if (player.Score > 10)
+                    {
+                        Area1 = true;
+                    }
+                    if (player.Score > 20)
+                    {
+                        Area2 = true;
+                    }
+
+                }
+                
+                var constY = 0.5f;
+                var constZ = 0.0f;
+                var randomA = random.Next(0, 100);
+                if(randomA < 30)
                 {
-                    items.Add(item.Id, item);
+                    constY = 0.5f;
+                    constZ = 0.0f;
+                }else if(randomA < 60 && Area1)
+                {
+                    constY = 2.5f;
+                    constZ = 30.0f;
+                }
+                else if(Area2)
+                {
+                    constY = 6.5f;
+                    constZ = 60.0f;
                 }
 
-                var rpcItem = new RPC.Item(item.Id, item.Position);
-                var spawnRpc = new Spawn(new SpawnPayload(rpcItem));
-                var spawnJson = JsonConvert.SerializeObject(spawnRpc);
-                broadcast(spawnJson);
+                var randomX = random.Next(-15, 15);
+                
+                var randomZ = random.Next(-15, 15);
+                
+                var position = new Position(randomX, constY, randomZ + constZ);
+               
+                    var item = new Item(uidCounter++, position);
+                    lock (items)
+                    {
+                        items.Add(item.Id, item);
+                    }
 
-                Console.WriteLine("<< Spawn");
+                    var rpcItem = new RPC.Item(item.Id, item.Position);
+                    var spawnRpc = new Spawn(new SpawnPayload(rpcItem));
+                    var spawnJson = JsonConvert.SerializeObject(spawnRpc);
+                    broadcast(spawnJson);
+
+                    Console.WriteLine("<< Spawn");
+                
             };
             timer.Start();
         }

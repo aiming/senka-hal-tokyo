@@ -12,6 +12,7 @@ namespace WebSocketSample.Server
         public event Action<string, LoginPayload> OnLogin;
         public event Action<string, PlayerUpdatePayload> OnPlayerUpdate;
         public event Action<string, GetItemPayload> OnGetItem;
+        public event Action<string, DecScorePayload> OnDecScore;
         public event Action<string, CollisionPayload> OnCollision;
 
         protected override void OnOpen()
@@ -56,6 +57,14 @@ namespace WebSocketSample.Server
                         OnGetItem(ID, getItemPayload);
                         break;
                     }
+                case "decscore":
+                    {
+                        var decPayload = JsonConvert.DeserializeObject<DecScore>(e.Data).Payload;
+                        OnDecScore(ID, decPayload);
+
+                        break;
+                    }
+           
                 case "collision":
                     {
                         var collisionPayload = JsonConvert.DeserializeObject<RPC.Collision>(e.Data).Payload;
