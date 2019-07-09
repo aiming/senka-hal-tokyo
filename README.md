@@ -1,4 +1,4 @@
-HAL
+HALLLLLLLLLLL
 ===============
 
 HAL専科用のサンプルコード
