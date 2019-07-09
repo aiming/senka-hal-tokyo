@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using WebSocketSharp;
 using RPC = WebSocketSample.RPC;
+using System.IO;
+using System.Text;
 
 public class MainController : MonoBehaviour
 {
@@ -14,11 +16,14 @@ public class MainController : MonoBehaviour
     [SerializeField]
     GameObject playerPrefab;
     [SerializeField]
+    GameObject cameraPrefab;
+    [SerializeField]
     GameObject otherPlayerPrefab;
     [SerializeField]
     GameObject itemPrefab;
 
     GameObject playerObj;
+    GameObject cameraObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
     int playerId;
     Dictionary<int, GameObject> otherPlayerObjs = new Dictionary<int, GameObject>();
@@ -26,7 +31,10 @@ public class MainController : MonoBehaviour
 
     void Start()
     {
-        webSocket = new WebSocket(connectAddress);
+        FileInfo fi = new FileInfo(Application.dataPath + "/" + "text.txt");
+        StreamReader sr = new StreamReader(fi.OpenRead(), Encoding.UTF8);
+
+        webSocket = new WebSocket(sr.ReadToEnd());
 
         // コネクションを確立したときのハンドラ
         webSocket.OnOpen += (sender, eventArgs) =>
@@ -129,6 +137,8 @@ public class MainController : MonoBehaviour
         playerId = response.Id;
         Debug.Log(playerId);
         playerObj = Instantiate(playerPrefab, new Vector3(0.0f, 0.5f, 0.0f), Quaternion.identity) as GameObject;
+        cameraObj = Instantiate(cameraPrefab, playerObj.transform.position, Quaternion.identity);
+        cameraObj.transform.parent = playerObj.transform;
 
         var playerController = playerObj.GetComponent<PlayerController>();
         playerController.OnCollision += (otherPlayerId) =>
@@ -136,6 +146,14 @@ public class MainController : MonoBehaviour
             var collisionRpc = new RPC.Collision(new RPC.CollisionPayload(playerId, otherPlayerId));
             var collisionJson = JsonUtility.ToJson(collisionRpc);
             webSocket.Send(collisionJson);
+        };
+        
+        playerController.OnSpace += (decScore) =>
+        {
+            var decRpc = new RPC.DecScore(new RPC.DecScorePayload(decScore, playerId));
+            var decJson = JsonUtility.ToJson(decRpc);
+            webSocket.Send(decJson);
+
         };
     }
 
@@ -267,6 +285,7 @@ public class MainController : MonoBehaviour
     Vector3 CalcPlayerScale(int score)
     {
         return Vector3.one + (Vector3.one * score * 0.2f);
+        //return Vector3.one;
     }
 
     void RestartGame()

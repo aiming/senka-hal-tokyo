@@ -217,6 +217,19 @@ namespace WebSocketSample.RPC
     }
 
     [System.Serializable]
+    public class DecScorePayload
+    {
+        public int PlayerId;
+        public int DecScore;
+
+        public DecScorePayload(int decScore, int playerId)
+        {
+            this.DecScore = decScore;
+            this.PlayerId = playerId;
+        }
+    }
+
+    [System.Serializable]
     public class DeleteItem
     {
         public string Method = "delete_item";
@@ -273,7 +286,17 @@ namespace WebSocketSample.RPC
             this.Payload = payload;
         }
     }
+    [System.Serializable]
+    public class DecScore
+    {
+        public string Method = "decscore";
+        public DecScorePayload Payload;
 
+        public DecScore(DecScorePayload payload)
+        {
+            this.Payload = payload;
+        }
+    }
     [System.Serializable]
     public class CollisionPayload
     {
